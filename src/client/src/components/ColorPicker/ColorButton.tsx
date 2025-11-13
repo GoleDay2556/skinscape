@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from "react";
+
 import { colord, RgbaColor } from "colord";
-import {useColorContext} from "../../stores.ts";
 import {getContrastingColor, noContextMenu} from "../../utils/helpers.ts";
 
 type ColorButtonProps = {

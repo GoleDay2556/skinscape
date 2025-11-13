@@ -49,6 +49,7 @@ export const Scene: React.FC<ModelDisplayProps> = ({
                             position={[xyz[0], xyz[1], xyz[2] + o1++ * 0.001]}
                             renderOrder={!isOverlay ? r1++ : r2++}
                             layers={isOverlay ? 2 : 1}
+                            name={`${element.name}/mesh`}
                         >
                             <boxGeometry args={[whd[0], whd[1], whd[2]]}>
                                 <float32BufferAttribute

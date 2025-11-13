@@ -10,8 +10,9 @@ import { Editor as EditorModel } from "../../models/editor.ts";
 import { ContextMenu } from "../ContextMenu/ContextMenu.tsx";
 import { MenuItem } from "../Menu/Menu.tsx";
 import { MutableSkin } from "../../models/skin.ts";
-import { useDialog } from "../../hooks/useDialog/useDialog.tsx";
+import { useWindow } from "../../hooks/useWindow/useWindow.tsx";
 import { useEditorContext, useToolContext } from "../../stores.ts";
+import { useWindowId } from "../../hooks/useWindowId/useWindowId.tsx";
 
 type EditorProps = {
     editor: EditorModel,
@@ -34,18 +35,18 @@ export const Editor: React.FC<EditorProps> = ({ editor, index }) => {
             editorRef.current.style.cursor = "url('/icons/crosshair@2x.png') 12 12, auto";
         }
     });
-    
+
     return (
         <React.Fragment>
             <div className="editor-sidebar">
+                <div className="palette-container">
+                    <Palette />
+                </div>
                 {index == 0 &&
                     <div className="picker-container">
                         <ColorPicker />
                     </div>
                 }
-                <div className="palette-container">
-                    <Palette />
-                </div>
             </div>
 
             <div className="editor-center" onMouseDown={onMouseDown}>
@@ -84,12 +85,13 @@ type EditorTabMenuProps = {
 const EditorTabMenu: React.FC<EditorTabMenuProps> = ({
     editor, skin
 }) => {
-    const { hideDialog } = useDialog();
+    const { hideWindow } = useWindow();
+    const { wid } = useWindowId();
     const { editors, activeEditor, setActiveEditor } = useEditorContext();
 
     function onClickOpen() {
         editor.setActiveSkin(editor.skins.indexOf(skin));
-        hideDialog();
+        hideWindow(wid);
     }
 
     function onClickDuplicate() {
@@ -97,19 +99,19 @@ const EditorTabMenu: React.FC<EditorTabMenuProps> = ({
         const copy = skin.copy();
         editor.skins.splice(index, 0, copy);
         editor.setActiveSkin(index + 1);
-        hideDialog();
+        hideWindow(wid);
     }
 
     function onClickClose() {
         editor.removeSkin(skin);
-        hideDialog();
+        hideWindow(wid);
     }
 
     function onClickCloseOthers() {
         editor.skins = [skin];
         editor.activeSkinIndex = 0;
         editor.update();
-        hideDialog();
+        hideWindow(wid);
     }
 
     function onClickCloseRight() {
@@ -119,7 +121,7 @@ const EditorTabMenu: React.FC<EditorTabMenuProps> = ({
             editor.activeSkinIndex = index - 1;
         }
         editor.update();
-        hideDialog();
+        hideWindow(wid);
     }
 
     function onClickSplitRight() {
@@ -127,14 +129,14 @@ const EditorTabMenu: React.FC<EditorTabMenuProps> = ({
         newEditor.skins.push(skin);
         editors.splice(activeEditor + 1, 0, newEditor);
         setActiveEditor(activeEditor + 1);
-        hideDialog();
+        hideWindow(wid);
     }
 
     function onClickSplitLeft() {
         const newEditor = new EditorModel();
         newEditor.skins.push(skin);
         editors.splice(activeEditor, 0, newEditor);
-        hideDialog();
+        hideWindow(wid);
     }
 
     return (<>

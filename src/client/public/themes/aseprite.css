@@ -11,8 +11,11 @@
     --icon-color: #000000;
 
     --button-color: #c6c6c6;
-    --button-hover: #ffffff;
+    --button-hover: #b3c9dc;
     --button-selected: #ffffff;
+
+    --button-primary: #d4dadf;
+    --button-secondary: #adb6bd;
 
     --border-dark: #000000;
     --border-color: #61555f;
@@ -26,6 +29,15 @@
 
 .button {
     --border-light: #ffffff;
+}
+
+.button-icon {
+    --button-hover: var(--border-light);
+}
+
+.button-primary:hover {
+    --border-light: #ffffff;
+    --button-hover: #ffffff;
 }
 
 .picker:before {

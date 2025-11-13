@@ -14,6 +14,8 @@ export const Icon = forwardRef<
     } as React.CSSProperties;
 
     return (
-        <div ref={ref} className="icon" style={style} {...props}></div>
+        <div ref={ref} className="icon" style={style} {...props}>
+            <img className="icon-image" src={image} />
+        </div>
     );
 });

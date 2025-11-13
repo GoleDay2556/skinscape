@@ -39,14 +39,20 @@ export const EditorScene: React.FC<EditorSceneProps> = ({
         camera.layers.enable(0);
         if (overlay) camera.layers.enable(2);
         if (gridlines) camera.layers.enable(overlay ? 4 : 3);
-        
-        scene.traverse(mesh => {
-            mesh.visible = true;
+
+        skin.model.elements.forEach(element => {
+            if (!element.name) return;
+            scene.getObjectByName(element.name)!.visible = true;
+            scene.getObjectByName(`${element.name}/mesh`)?.layers.enable(
+                element.name.startsWith("overlay:") ? 2 : 1
+            );
         });
 
-        elementToggles.forEach(element => {
+        elementToggles.forEach(element => {            
             scene.getObjectByName(element)!.visible = false;
             scene.getObjectByName(`overlay:${element}`)!.visible = false;
+            scene.getObjectByName(`${element}/mesh`)?.layers.disableAll();
+            scene.getObjectByName(`overlay:${element}/mesh`)?.layers.disableAll();
         });
     }, [initialized]);
 
@@ -146,7 +152,6 @@ const ThreeRefHook: React.FC<ThreeRefHookProps> = ({ threeRef, canvasRef }) => {
 
     useEffect(() => {
         threeRef.current = three;
-        console.log("THREE.js update");
     }, [three]);
 
     return <></>;

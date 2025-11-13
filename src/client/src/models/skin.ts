@@ -1,8 +1,10 @@
-import {rgbaBlendNormal} from "../utils/blending";
-import type {RgbaColor} from "colord";
-import type {Model} from "./model";
-import {History} from "./history";
-import {DataTexture} from "three";
+import { BLEND_FUNCS } from "../utils/blending";
+import { AnyColor, colord, RgbaColor } from "colord";
+import type { Model } from "./model";
+import { History } from "./history";
+import { DataTexture } from "three";
+import { textureSizeEquals } from "../utils/helpers.ts";
+import { useEditorSettingsContext } from "../stores.ts";
 
 export type Texture = {
     size: number[];
@@ -42,11 +44,17 @@ export class Skin {
 
     protected static possiblyResize(model: Model, texture: Texture): Texture {
         let tex = texture;
-        if (texture.size[0] == 64 && texture.size[1] == 32 && model.texture_size !== texture.size) { // Probably old 64x32 texture
+
+        if (
+            texture.size[0] == 64 && texture.size[1] == 32
+            && !textureSizeEquals(model.texture_size, texture.size)
+        ) { // Probably old 64x32 texture
+            console.log("Resizing skin clamped.");
             tex = this.resizeClamped(tex.data, [64, 64]);
         }
 
-        if (model.texture_size !== texture.size) { // Texture sizes do not align
+        if (!textureSizeEquals(model.texture_size, texture.size)) { // Texture sizes do not align
+            console.log("Resizing nearest neighbor.");
             tex = this.resizeNearestNeighbor(tex.data, tex.size, model.texture_size);
         }
 
@@ -92,21 +100,22 @@ export class Skin {
 
     protected static flipY(texture: Texture): Texture {
         const [width, height] = texture.size;
-        const newTexture = new Uint8ClampedArray(texture.data.length);
+        const data = new Uint8ClampedArray(texture.data.length);
+
         for (let x = 0; x < width; x++) {
             for (let y = 0; y < height; y++) {
-                const flipY = height - y;
+                const flipY = (height - 1) - y;
 
                 const srcPos = (y * width + x) * 4;
                 const destPos = (flipY * width + x) * 4;
                 for (let i = 0; i < 4; i++) {
-                    newTexture[destPos * 4 + i] = texture.data[srcPos + i];
+                    data[destPos + i] = texture.data[srcPos + i];
                 }
             }
         }
+
         return {
-            data: newTexture,
-            size: texture.size
+            data, size: texture.size
         };
     }
 
@@ -165,10 +174,10 @@ export class MutableSkin extends Skin {
     toJSON(): any {
         return {
             name: this.name,
-            layers: this.layers,
+            layers: this.layers.map(it => it.toJSON()),
             activeLayerId: this.activeLayerId,
             model: this.model,
-            history: this.history,
+            history: this.history.toJSON(),
         }
     }
 
@@ -192,7 +201,8 @@ export class MutableSkin extends Skin {
     setTexture(texture: Texture) {
         this.data.set(Skin.possiblyResize(this.model, Skin.flipY(texture)).data); // Will keep shape
         this.layers = [new Layer(this, "default")];
-        this.layers[0].data = new Uint8ClampedArray(this.data);
+
+        this.layers[0].data = texture.data;
         this.activeLayerId = this.layers[0].uuid;
     }
 
@@ -239,6 +249,12 @@ export class MutableSkin extends Skin {
         this.texture.needsUpdate = true;
     }
 
+    updateAllPixels() {
+        for (let pos = 0; pos < this.data.length; pos += 4) {
+            this.updatePixel(pos);
+        }
+    }
+
     /**
      * Gets the pixel at coords `(x, y)`.
      */
@@ -252,6 +268,7 @@ export class MutableSkin extends Skin {
      * @param pos offset in texture buffer
      */
     getPixelByPos(pos: number): RgbaColor {
+        const blendFunc = BLEND_FUNCS[useEditorSettingsContext.getState().blendFunc];
         let color = { r: 0, g: 0, b: 0, a: 0 };
         for (let i = 0; i < this.layers.length + this.tempLayers.length; i++) {
             let layer: Layer;
@@ -262,13 +279,9 @@ export class MutableSkin extends Skin {
             }
             if (!layer.isActive) continue; // Skip hidden layers
             const layerColor = layer.getPixelByPos(pos);
-            if (layerColor.a === 1) { // Alpha already transformed to 0-255 by layer
-                color = layerColor;
-            } else {
-                color = rgbaBlendNormal(color, layerColor);
-            }
+            color = blendFunc(color, layerColor);
         }
-        return { r: color.r, g: color.g, b: color.b, a: color.a };
+        return color;
     }
 
     /**
@@ -329,8 +342,7 @@ export class Layer {
      * Gets the pixel at coords `(x, y)`.
      */
     getPixel(x: number, y: number): RgbaColor {
-        const c = this.getPixelByPos(this.skin.getPos(x, y));
-        return { r: c.r, g: c.g, b: c.b, a: c.a };
+        return this.getPixelByPos(this.skin.getPos(x, y));
     }
 
     /**
@@ -341,7 +353,7 @@ export class Layer {
     getPixelByPos(pos: number): RgbaColor {
         return {
             r: this.data[pos], g: this.data[pos + 1],
-            b: this.data[pos + 2], a: this.data[pos + 3],
+            b: this.data[pos + 2], a: this.data[pos + 3] / 255,
         };
     }
 
@@ -355,7 +367,7 @@ export class Layer {
      */
     setPixel(
         x: number, y: number,
-        color: RgbaColor,
+        color: AnyColor,
         blend: boolean = true,
     ) {
         this.setPixelByPos(this.skin.getPos(x, y), color, blend);
@@ -369,15 +381,15 @@ export class Layer {
      * @param blend should color be blended (only affects colors with alpha)
      */
     setPixelByPos(
-        pos: number, color: RgbaColor, blend: boolean = true
+        pos: number, color: AnyColor, blend: boolean = true
     ) {
+        const blendFunc = BLEND_FUNCS[useEditorSettingsContext.getState().blendFunc];
+        let rgba = colord(color).toRgb();
         if (blend) {
-            if (color.a !== 1) { // Mix colors if color is transparent
-                const current = this.getPixelByPos(pos);
-                color = rgbaBlendNormal(current, color);
-            }
+            const current = this.getPixelByPos(pos);
+            rgba = blendFunc(current, rgba);
         }
-        this.data.set([color.r, color.g, color.b, color.a], pos);
+        this.data.set([rgba.r, rgba.g, rgba.b, Math.floor(rgba.a * 255)], pos);
         this.skin.updatePixel(pos);
     }
 

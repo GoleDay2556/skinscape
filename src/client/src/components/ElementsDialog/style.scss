@@ -1,0 +1,64 @@
+.elements-dialog-model {
+    position: relative;
+    aspect-ratio: 16 / 32; // Maintain the model's proportions
+    width: 100px;
+
+    div {
+        position: absolute;
+        box-shadow: 0 0 0 2px var(--border-dark);
+
+        // Calculate sizes and positions relative to the parent
+        // Head
+        &.elements-dialog-model-head {
+            width: calc((12 - 4) / 16 * 100%);
+            height: calc((32 - 24) / 32 * 100%);
+            left: calc(4 / 16 * 100%);
+            top: calc((1 - 32 / 32) * 100%); // Flipping the Y axis
+        }
+
+        // Right Arm
+        &.elements-dialog-model-left-arm {
+            width: calc((16 - 12) / 16 * 100%);
+            height: calc((24 - 12) / 32 * 100%);
+            left: calc(12 / 16 * 100%);
+            top: calc((1 - 24 / 32) * 100%);
+        }
+
+        // Body
+        &.elements-dialog-model-body {
+            width: calc((12 - 4) / 16 * 100%);
+            height: calc((24 - 12) / 32 * 100%);
+            left: calc(4 / 16 * 100%);
+            top: calc((1 - 24 / 32) * 100%);
+        }
+
+        // Left Arm
+        &.elements-dialog-model-right-arm {
+            width: calc((4 - 0) / 16 * 100%);
+            height: calc((24 - 12) / 32 * 100%);
+            left: calc(0 / 16 * 100%);
+            top: calc((1 - 24 / 32) * 100%);
+        }
+
+        // Right Leg
+        &.elements-dialog-model-left-leg {
+            width: calc((11.9 - 7.9) / 16 * 100%);
+            height: calc((12 - 0) / 32 * 100%);
+            left: calc(7.9 / 16 * 100%);
+            top: calc((1 - 12 / 32) * 100%);
+        }
+
+        // Left Leg
+        &.elements-dialog-model-right-leg {
+            width: calc((8.1 - 4.1) / 16 * 100%);
+            height: calc((12 - 0) / 32 * 100%);
+            left: calc(4.1 / 16 * 100%);
+            top: calc((1 - 12 / 32) * 100%);
+        }
+
+        // Toggled state
+        &:not(.disabled) {
+            background-color: rgba(66, 66, 224, 0.3);
+        }
+    }
+}

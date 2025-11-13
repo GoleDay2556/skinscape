@@ -1,1 +1,1 @@
-export * from "./ColorHueSlider.tsx";
+export * from "./ColorHueSlider";

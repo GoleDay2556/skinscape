@@ -1,0 +1,16 @@
+.dialog-hsv-label {
+  margin-bottom: 4px;
+}
+
+.dialog-hsv-slider {
+  width: 300px;
+  height: 20px;
+
+  margin-bottom: 8px;
+  box-shadow: 0 0 0 2px var(--border-dark);
+}
+
+.dialog-hsv-buttons {
+  display: flex;
+  gap: 6px;
+}

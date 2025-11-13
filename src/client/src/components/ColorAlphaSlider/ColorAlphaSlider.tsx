@@ -1,16 +1,18 @@
+import "./style.scss";
+
 import React, { useEffect, useRef, useState } from "react";
 
 import { useWindowEvent } from "../../hooks/useWindowEvent";
-import { colord, HsvaColor } from "colord";
 import { noContextMenu } from "../../utils/helpers.ts";
 import { Indicator } from "../Indicator";
+import { colord, HsvaColor } from "colord";
 
-type ColorAlphaProps = {
+type ColorAlphaSliderProps = {
     hsva: HsvaColor,
     setHsva: (hsva: HsvaColor) => void
 };
 
-export const ColorAlpha: React.FC<ColorAlphaProps> = ({
+export const ColorAlphaSlider: React.FC<ColorAlphaSliderProps> = ({
     hsva, setHsva
 }) => {
     const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -22,16 +24,16 @@ export const ColorAlpha: React.FC<ColorAlphaProps> = ({
         button.current = event.button;
         if (button.current !== -1) {
             document.getElementById("color-cursor-overlay")!.style.display = "block";
-            updateHue(event.clientX);
+            updateAlpha(event.clientX);
         }
     }
 
-    function updateHue(clientX: number) {
+    function updateAlpha(clientX: number) {
         if (!divRef.current) return;
         const rect = divRef.current.getBoundingClientRect();
 
         const a = Math.min(1, Math.max(0,
-            (clientX - rect.left) / rect.width
+            (clientX - rect.left) / rect.width * 1
         ));
 
         const newHsva = { h: hsva.h, s: hsva.s, v: hsva.v, a };
@@ -42,8 +44,8 @@ export const ColorAlpha: React.FC<ColorAlphaProps> = ({
         if (!divRef.current) return;
         const rect = divRef.current.getBoundingClientRect();
 
+        const x = Math.floor(rect.width * hsva.a / 2) * 2;
         const y = rect.height / 2;
-        const x = rect.width * hsva.a;
         setPos({ x, y });
     }
 
@@ -55,11 +57,11 @@ export const ColorAlpha: React.FC<ColorAlphaProps> = ({
     });
 
     useWindowEvent("mousemove", (event: MouseEvent) => {
-        if (button.current !== -1) updateHue(event.clientX);
+        if (button.current !== -1) updateAlpha(event.clientX);
     }, [hsva]);
 
     useWindowEvent("resize", updatePos);
-    useEffect(() => updatePos, [hsva]);
+    useEffect(updatePos, [hsva]);
 
     const style = {
         "--color": colord({ h: hsva.h, s: hsva.s, v: hsva.v, a: 1 }).toHex(),
@@ -67,7 +69,7 @@ export const ColorAlpha: React.FC<ColorAlphaProps> = ({
 
     return (
         <div
-            className="color-alpha"
+            className="color-alpha-slider"
             tabIndex={0}
             ref={divRef}
             onMouseDown={onMouseDown}

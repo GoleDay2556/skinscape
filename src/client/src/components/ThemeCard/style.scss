@@ -1,0 +1,12 @@
+.theme-card {
+    background-color: var(--background-color);
+    color: var(--foreground-color);
+
+    font-family: var(--font-small);
+    font-size: unset;
+
+    padding: 4px;
+    
+    border: 2px solid var(--border-dark);
+    border-radius: 0;
+}

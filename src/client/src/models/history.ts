@@ -3,7 +3,7 @@ import { Layer, MutableSkin } from "./skin";
 
 export class History {
 
-    private skin: MutableSkin;
+    private readonly skin: MutableSkin;
     stack: Array<Edit>;
     offset: number;
 
@@ -19,6 +19,8 @@ export class History {
             switch (it.type) {
                 case "edit-change-pixels":
                     return EditChangePixels.fromJSON(it);
+                case "edit-change-all-pixels":
+                    return EditChangeAllPixels.fromJSON(it);
                 case "edit-change-layer":
                     return EditChangeLayer.fromJSON(it);
                 case "edit-delete-layer":
@@ -192,6 +194,43 @@ export class EditDeleteLayer implements Edit {
         if (this.wasActiveLayer) {
             skin.activeLayerId = this.layer.uuid;
         }
+    }
+
+}
+
+export class EditChangeAllPixels implements Edit {
+
+    type: string = "edit-change-all-pixels";
+    from: Uint8ClampedArray;
+    to: Uint8ClampedArray;
+
+    constructor(from: Uint8ClampedArray, to: Uint8ClampedArray) {
+        this.from = from;
+        this.to = to;
+    }
+
+    static fromJSON(json: any): EditChangeAllPixels {
+        const from = new Uint8ClampedArray(json.from);
+        const to = new Uint8ClampedArray(json.from);
+        return new EditChangeAllPixels(from, to);
+    }
+
+    toJson(): any {
+        return {
+            type: this.type,
+            from: this.from,
+            to: this.to
+        };
+    }
+
+    do(skin: MutableSkin): void {
+        skin.activeLayer.data = this.to;
+        skin.updateAllPixels();
+    }
+
+    undo(skin: MutableSkin): void {
+        skin.activeLayer.data = this.from;
+        skin.updateAllPixels();
     }
 
 }

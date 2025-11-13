@@ -6,22 +6,10 @@ import { EditorPage } from "./pages/EditorPage";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router";
 import { MessagePage } from "./pages/MessagePage";
 import { useSettingsContext } from "./stores";
-import { DialogProvider } from "./context/DialogContext";
+import { WindowProvider } from "./context/WindowContext";
 
 export default function App() {
     const { theme } = useSettingsContext();
-
-    function createThemeLink(theme: string) {
-        const themeName = theme == "auto" ? "dark" : theme;
-
-        const link = document.createElement("link");
-        link.id = "theme-link"
-        link.type = "text/css";
-        link.rel = "stylesheet";
-        link.href = `/themes/${themeName}.css`;
-
-        document.head.appendChild(link);
-    }
 
     useEffect(() => {
         const themeName = theme == "auto" ? "dark" : theme;
@@ -29,10 +17,8 @@ export default function App() {
         (document.getElementById("theme-link") as HTMLLinkElement).href = `/themes/${themeName}.css`;
     }, [theme]);
 
-    createThemeLink(useSettingsContext.getState().theme);
-
     return (
-        <DialogProvider>
+        <WindowProvider>
             <BrowserRouter>
                 <Routes>
                     <Route path="/" element={<Navigate to="/editor" replace />} />
@@ -46,6 +32,6 @@ export default function App() {
                     } />
                 </Routes>
             </BrowserRouter>
-        </DialogProvider>
+        </WindowProvider>
     );
 }

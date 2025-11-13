@@ -10,13 +10,15 @@
     --text-link: #4393de;
     --text-link-hover: #ffffff;
 
-    --icon-color: #cecece;
-
-    --button-color: var(--main-color);
+    --icon-color: #ffffff;
 
     --border-dark: #000000;
     --border-color: #3f3f3f;
     --border-light: #9b9b9b;
+}
+
+.button-icon {
+    padding: 2px;
 }
 
 .button:hover {

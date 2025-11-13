@@ -4,23 +4,47 @@
 
   background-color: var(--button-color);
   color: var(--text-primary);
-  margin: 4px;
   padding: 2px;
-  box-shadow:
-          2px 0 0 0 var(--border-dark), -2px 0 0 0 var(--border-dark), 0 2px 0 0 var(--border-dark), 0 -2px 0 0 var(--border-dark),
-          0 0 0 2px var(--main-color),
-          2px 0 0 2px var(--border-light), -2px 0 0 2px var(--border-light), 0 2px 0 2px var(--border-light), 0 -2px 0 2px var(--border-light),
-          0 0 0 4px var(--border-color);
   font-family: var(--font-small), serif;
   font-size: 16px;
 }
 
-.button:hover {
-  background-color: var(--button-hover);
+.button-primary {
+  margin: 4px 4px 6px 4px;
+
+  background-color: var(--button-primary, var(--secondary-color));
+  box-shadow:
+          2px 0 0 0 var(--border-light), -2px 0 0 0 var(--border-light), 0 2px 0 0 var(--border-light), 0 -2px 0 0 var(--border-light),
+          0 0 0 2px var(--border-color),
+          0 2px 0 2px var(--border-color),
+          1px 1px 0 3px var(--border-dark), -1px 1px 0 3px var(--border-dark), 0 4px 0 2px var(--border-dark), 0 -2px 0 2px var(--border-dark),
 }
 
-.button-size-icon {
+.button-secondary {
+  margin: 4px 4px 6px 4px;
+
+  background-color: var(--button-secondary, var(--main-color));
+  box-shadow:
+          2px 0 0 0 var(--border-light), -2px 0 0 0 var(--border-light), 0 2px 0 0 var(--border-light), 0 -2px 0 0 var(--border-light),
+          0 0 0 2px var(--border-color),
+          0 2px 0 2px var(--border-color),
+          1px 1px 0 3px var(--border-dark), -1px 1px 0 3px var(--border-dark), 0 4px 0 2px var(--border-dark), 0 -2px 0 2px var(--border-dark),
+}
+
+.button-icon {
   padding: 0;
   line-height: 0;
   aspect-ratio: 1/1;
+
+  margin: 4px;
+
+  background-color: var(--secondary-color);
+  box-shadow:
+          2px 0 0 0 var(--border-light), -2px 0 0 0 var(--border-light), 0 2px 0 0 var(--border-light), 0 -2px 0 0 var(--border-light),
+          0 0 0 2px var(--main-color),
+          2px 0 0 2px var(--border-dark), -2px 0 0 2px var(--border-dark), 0 2px 0 2px var(--border-dark), 0 -2px 0 2px var(--border-dark),
+}
+
+.button:hover {
+  background-color: var(--button-hover);
 }

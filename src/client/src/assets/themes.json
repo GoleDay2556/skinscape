@@ -1,0 +1,11 @@
+[{
+    "id": "dark",
+    "name": "Dark",
+    "previewBackground": "#2a2a2a",
+    "previewForeground": "#ffffff"
+}, {
+    "id": "light",
+    "name": "Light",
+    "previewBackground": "#ededf3",
+    "previewForeground": "#000000"
+}]

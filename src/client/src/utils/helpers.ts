@@ -1,10 +1,10 @@
 import React from "react";
 
-import { colord, extend, RgbaColor } from "colord";
+import {colord, extend, RgbaColor} from "colord";
 import labPlugin from "colord/plugins/mix";
 
-import { Skin, Texture } from "../models/skin.ts";
-import { useToolContext } from "../stores.ts";
+import {Skin, Texture} from "../models/skin.ts";
+import {useToolContext} from "../stores.ts";
 
 extend([labPlugin]);
 
@@ -54,6 +54,25 @@ export function getSkinSubsection(
 }
 
 /**
+ *
+ */
+export async function parseTexture(array: ArrayBuffer): Promise<Texture> {
+    const bitmap = await createImageBitmap(
+        new Blob([array], { type: "image/png" })
+    );
+
+    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+    const ctx = canvas.getContext("2d")!;
+    ctx.drawImage(bitmap, 0, 0);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    return {
+        size: [canvas.width, canvas.height],
+        data: imageData.data
+    };
+}
+
+/**
  * Returns a data URL of an image defined in `rgbaArray` of width `width` and height `height`.
  */
 export function textureToDataUrl(texture: Texture): string {
@@ -68,6 +87,14 @@ export function textureToDataUrl(texture: Texture): string {
     ctx.putImageData(imageData, 0, 0);
 
     return canvas.toDataURL("image/png");
+}
+
+/**
+ * Returns true if the two texture sizes `a` and `b` match.
+ */
+export function textureSizeEquals(a: number[], b: number[]): boolean {
+    if (a.length !== 2 || b.length !== 2) return false;
+    return a[0] === b[0] && a[1] === b[1];
 }
 
 /**
@@ -133,4 +160,12 @@ export function classNames(names: {
     return Object.keys(names).map(key => {
         if (names[key]) return key;
     }).filter(it => it != undefined).join(" ");
+}
+
+export function makePossessive(name: string): string {
+    if (name.endsWith("s") || name.endsWith("S")) {
+        return `${name}'`;
+    } else {
+        return `${name}'s`;
+    }
 }

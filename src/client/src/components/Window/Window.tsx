@@ -1,33 +1,37 @@
 import "./style.scss";
 
+import closeImage from "../../assets/icons/close@2x.png";
+
 import React, { useEffect, useRef, useState } from "react";
 
-import { useDialog } from "../../hooks/useDialog";
+import { useWindow } from "../../hooks/useWindow";
 import { Button } from "../Button";
 import { Icon } from "../Icon";
-import { Center } from "../Center";
 import { useWindowEvent } from "../../hooks/useWindowEvent";
+import { useWindowId } from "../../hooks/useWindowId";
 
-type DialogProps = {
+type WindowProps = {
     title?: string,
     children: React.ReactNode,
+    onClose?: () => void;
 };
 
-export const Dialog: React.FC<DialogProps> = ({
-    title, children,
+export const Window: React.FC<WindowProps> = ({
+    title, children, onClose,
 }) => {
-    const { hideDialog } = useDialog();
+    const { hideWindow } = useWindow();
+    const { wid } = useWindowId();
 
-    const dialogRef = useRef<HTMLDivElement>(null);
+    const windowRef = useRef<HTMLDivElement>(null);
 
+    const [visible, setVisible] = useState(false);
     const [pos, setPos] = useState({ x: 0, y: 0 });
     const isDragging = useRef(false);
     const startPos = useRef({ x: 0, y: 0 });
-    const [visible, setVisible] = useState(false);
 
     function resize() {
-        if (!dialogRef.current) return;
-        const { width, height } = dialogRef.current.getBoundingClientRect();
+        if (!windowRef.current) return;
+        const { width, height } = windowRef.current.getBoundingClientRect();
 
         const x = Math.floor((window.innerWidth - width) / 4) * 2;
         const y = Math.floor((window.innerHeight - height) / 4) * 2;
@@ -37,7 +41,7 @@ export const Dialog: React.FC<DialogProps> = ({
     }
 
     function onMouseDown(event: React.MouseEvent) {
-        if (!dialogRef.current) return;
+        if (!windowRef.current) return;
 
         isDragging.current = true;
         startPos.current = {
@@ -47,8 +51,8 @@ export const Dialog: React.FC<DialogProps> = ({
     }
 
     function onMouseMove(event: MouseEvent) {
-        if (!dialogRef.current || !isDragging.current) return;
-        const { width, height } = dialogRef.current.getBoundingClientRect();
+        if (!windowRef.current || !isDragging.current) return;
+        const { width, height } = windowRef.current.getBoundingClientRect();
 
         let x = event.clientX - startPos.current.x;
         let y = event.clientY - startPos.current.y;
@@ -67,7 +71,12 @@ export const Dialog: React.FC<DialogProps> = ({
     }
 
     function onKeyDown(event: KeyboardEvent) {
-        if (event.key == "Escape") hideDialog();
+        if (event.key == "Escape") hideWindow(wid);
+    }
+
+    function onCloseClicked() {
+        if (onClose) onClose();
+        hideWindow(wid);
     }
 
     useWindowEvent("mousemove", onMouseMove);
@@ -75,7 +84,7 @@ export const Dialog: React.FC<DialogProps> = ({
     useWindowEvent("keydown", onKeyDown);
 
     useWindowEvent("resize", resize);
-    useEffect(resize, [dialogRef]);
+    useEffect(resize, [windowRef]);
 
     const style = {
         left: `${pos.x}px`,
@@ -84,14 +93,14 @@ export const Dialog: React.FC<DialogProps> = ({
     } as React.CSSProperties;
 
     return (
-        <div ref={dialogRef} className="dialog" style={style}>
-            {title && <div className="dialog-title" onMouseDown={onMouseDown}>
+        <div ref={windowRef} className="window" style={style}>
+            {title && <div className="window-title" onMouseDown={onMouseDown}>
                 {title}
-                <Button size="icon" onClick={hideDialog}>
-                    <Icon image="icons/close@2x.png"/>
+                <Button variant="icon" onClick={onCloseClicked}>
+                    <Icon image={closeImage} />
                 </Button>
             </div>}
-            <div className="dialog-content">
+            <div className="window-content">
                 {children}
             </div>
         </div>

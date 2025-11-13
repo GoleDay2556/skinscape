@@ -2,10 +2,11 @@ import "./style.scss";
 
 import React from "react";
 
-import { noContextMenu } from "../../utils/helpers.ts";
+import { noContextMenu } from "../../utils/helpers";
 import { Menu } from "../Menu";
-import { useDialog } from "../../hooks/useDialog/useDialog.tsx";
-import { useWindowEvent } from "../../hooks/useWindowEvent/useWindowEvent.tsx";
+import { useWindow } from "../../hooks/useWindow";
+import { useWindowEvent } from "../../hooks/useWindowEvent";
+import { useWindowId } from "../../hooks/useWindowId";
 
 type ContextMenuProps = {
     menu: React.ReactNode,
@@ -15,21 +16,21 @@ type ContextMenuProps = {
 export const ContextMenu: React.FC<ContextMenuProps> = ({
     menu, children
 }) => {
-    const { showDialog } = useDialog();
+    const { showWindow } = useWindow();
 
     function onContextMenu(event: React.MouseEvent) {
         event.preventDefault();
         const x = Math.floor(event.clientX / 2) * 2;
         const y = Math.floor(event.clientY / 2) * 2;
 
-        showDialog(
+        showWindow(
             <ContextMenuDialog menu={menu} x={x} y={y} />
         );
     };
 
     return (
         <React.Fragment>
-            <div onContextMenu={onContextMenu} style={{display: "contents"}}>
+            <div onContextMenu={onContextMenu} style={{ display: "contents" }}>
                 {children}
             </div>
         </React.Fragment>
@@ -43,14 +44,15 @@ type ContextMenuDialogProps = {
 }
 
 const ContextMenuDialog: React.FC<ContextMenuDialogProps> = ({ menu, x, y }) => {
-    const { hideDialog } = useDialog();
+    const { hideWindow } = useWindow();
+    const { wid } = useWindowId();
 
     function onClick(event: React.MouseEvent) {
         event.stopPropagation();
     }
 
     useWindowEvent("click", () => {
-        hideDialog();
+        hideWindow(wid);
     });
 
     const style = {

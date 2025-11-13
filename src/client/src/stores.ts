@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { colord, HsvaColor, RgbaColor } from "colord";
 import { EyedropperHandler, getTool, ToolProps } from "./models/tool.ts";
 import { Editor } from "./models/editor.ts";
+import { BlendFuncKind } from "./utils/blending.ts";
 
 type ColorState = {
     rgba: RgbaColor,
@@ -143,3 +144,15 @@ export const useEditorContext = create<EditorState>()(
         },
     ),
 );
+
+type EditorSettingsState = {
+    blendFunc: BlendFuncKind,
+    setBlendFunc: (blendFunc: BlendFuncKind) => void,
+} 
+
+export const useEditorSettingsContext = create<EditorSettingsState>(
+    (set, get) => ({
+        blendFunc: "Normal",
+        setBlendFunc: (blendFunc: BlendFuncKind) => set({ blendFunc })
+    })
+)
